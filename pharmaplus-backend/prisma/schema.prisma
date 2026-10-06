@@ -1,0 +1,791 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =====================================================
+// ENUMS
+// =====================================================
+
+enum Role {
+  CUSTOMER
+  PATIENT
+  DOCTOR
+  PHARMACIST
+  RECEPTIONIST
+  BRANCH_MANAGER
+  WAREHOUSE_MANAGER
+  WAREHOUSE_EMPLOYEE
+  DELIVERY_RIDER
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  ON_LEAVE
+  PENDING
+  REJECTED
+}
+
+enum BranchStatus {
+  ACTIVE
+  MAINTENANCE
+  DISABLED
+}
+
+enum PrescriptionStatus {
+  PENDING
+  DISPENSED
+  CANCELLED
+}
+
+enum AppointmentType {
+  PHYSICAL_CHECKUP
+  XRAY_SCAN
+  LAB_TEST
+  ONLINE_CONSULT
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  REJECTED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  HALF_DAY
+  ON_LEAVE
+}
+
+enum DeliveryStatus {
+  PENDING
+  ASSIGNED
+  PICKED_UP
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum DeliveryPriority {
+  NORMAL
+  HIGH
+  URGENT
+}
+
+// =====================================================
+// ORDER STATUS
+// =====================================================
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+// =====================================================
+// USER
+// =====================================================
+
+// =====================================================
+// USER
+// =====================================================
+
+model User {
+  id           String     @id @default(uuid())
+  fullName     String
+  email        String     @unique
+  password     String
+  role         Role       @default(PATIENT)
+  status       UserStatus @default(ACTIVE)
+  phone        String?
+  address      String?
+  profileImage String?
+  employeeId   String?    @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ---------------------------------------------------
+  // BRANCH
+  // ---------------------------------------------------
+
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  // ---------------------------------------------------
+  // PRESCRIPTIONS
+  // ---------------------------------------------------
+
+  doctorPrescriptions  Prescription[] @relation("DoctorPrescriptions")
+  patientPrescriptions Prescription[] @relation("PatientPrescriptions")
+
+  // ---------------------------------------------------
+  // APPOINTMENTS
+  // ---------------------------------------------------
+
+  patientAppointments Appointment[] @relation("PatientAppointments")
+  doctorAppointments  Appointment[] @relation("DoctorAppointments")
+
+  // ---------------------------------------------------
+  // ATTENDANCE
+  // ---------------------------------------------------
+
+  attendances Attendance[]
+
+  // ---------------------------------------------------
+  // DELIVERY
+  // ---------------------------------------------------
+
+  deliveries        Delivery[] @relation("RiderDeliveries")
+  createdDeliveries Delivery[] @relation("DeliveryCreatedBy")
+
+  // ---------------------------------------------------
+  // WAREHOUSE
+  // ---------------------------------------------------
+
+  warehouseEmployee WarehouseEmployee?
+
+  // ---------------------------------------------------
+  // AUDIT LOGS
+  // ---------------------------------------------------
+
+  auditLogs AuditLog[]
+
+  // ---------------------------------------------------
+  // ORDERS
+  // ---------------------------------------------------
+
+  orders Order[] @relation("CustomerOrders")
+
+  // ---------------------------------------------------
+  // INDEXES
+  // ---------------------------------------------------
+
+  @@index([role])
+  @@index([branchId])
+  @@index([status])
+}
+
+// =====================================================
+// BRANCH
+// =====================================================
+
+model Branch {
+  id       String       @id @default(uuid())
+  name     String       @unique
+  code     String?      @unique
+  location String
+  phone    String?
+  status   BranchStatus @default(ACTIVE)
+  isActive Boolean      @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ---------------------------------------------------
+  // USERS
+  // ---------------------------------------------------
+
+  users User[]
+
+  // ---------------------------------------------------
+  // PRESCRIPTIONS
+  // ---------------------------------------------------
+
+  prescriptions Prescription[]
+
+  // ---------------------------------------------------
+  // MEDICINES
+  // ---------------------------------------------------
+
+  medicines Medicine[]
+
+  // ---------------------------------------------------
+  // PRODUCTS
+  // ---------------------------------------------------
+
+  products Product[]
+
+  // ---------------------------------------------------
+  // APPOINTMENTS
+  // ---------------------------------------------------
+
+  appointments Appointment[]
+
+  // ---------------------------------------------------
+  // DELIVERIES
+  // ---------------------------------------------------
+
+  deliveries Delivery[]
+
+  // ---------------------------------------------------
+  // INVENTORIES
+  // ---------------------------------------------------
+
+  inventories Inventory[]
+
+  // ---------------------------------------------------
+  // INDEX
+  // ---------------------------------------------------
+
+  @@index([status])
+}
+
+// =====================================================
+// AUDIT LOG
+// =====================================================
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+// =====================================================
+// ATTENDANCE
+// =====================================================
+
+model Attendance {
+  id String @id @default(uuid())
+
+  // ---------------------------------------------------
+  // USER
+  // ---------------------------------------------------
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // ---------------------------------------------------
+  // DATE
+  // ---------------------------------------------------
+
+  date DateTime
+
+  // ---------------------------------------------------
+  // CHECK IN / OUT
+  // ---------------------------------------------------
+
+  checkIn  DateTime?
+  checkOut DateTime?
+
+  // ---------------------------------------------------
+  // STATUS
+  // ---------------------------------------------------
+
+  status  AttendanceStatus @default(PRESENT)
+  remarks String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ---------------------------------------------------
+  // INDEXES
+  // ---------------------------------------------------
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+  @@index([status])
+}
+
+// =====================================================
+// APPOINTMENT
+// =====================================================
+
+model Appointment {
+  id String @id @default(uuid())
+
+  // ---------------------------------------------------
+  // PROBLEM
+  // ---------------------------------------------------
+
+  problem String
+
+  // ---------------------------------------------------
+  // TYPE
+  // ---------------------------------------------------
+
+  type AppointmentType @default(PHYSICAL_CHECKUP)
+
+  // ---------------------------------------------------
+  // STATUS
+  // ---------------------------------------------------
+
+  status AppointmentStatus @default(PENDING)
+
+  // ---------------------------------------------------
+  // SCHEDULE
+  // ---------------------------------------------------
+
+  scheduledAt DateTime?
+
+  // ---------------------------------------------------
+  // PATIENT
+  // ---------------------------------------------------
+
+  patientId String?
+  patient   User?   @relation("PatientAppointments", fields: [patientId], references: [id], onDelete: SetNull)
+
+  // ---------------------------------------------------
+  // BRANCH
+  // ---------------------------------------------------
+
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  // ---------------------------------------------------
+  // DOCTOR
+  // ---------------------------------------------------
+
+  doctorId String?
+  doctor   User?   @relation("DoctorAppointments", fields: [doctorId], references: [id], onDelete: SetNull)
+
+  // ---------------------------------------------------
+  // TIMESTAMPS
+  // ---------------------------------------------------
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ---------------------------------------------------
+  // INDEXES
+  // ---------------------------------------------------
+
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([branchId])
+  @@index([status])
+  @@index([scheduledAt])
+}
+
+// =====================================================
+// PRESCRIPTION
+// =====================================================
+
+model Prescription {
+  id String @id @default(uuid())
+
+  // ---------------------------------------------------
+  // DOCTOR
+  // ---------------------------------------------------
+
+  // Optional because a customer can upload
+  // a prescription without a doctor being assigned yet.
+  doctorId String?
+  doctor   User?   @relation("DoctorPrescriptions", fields: [doctorId], references: [id])
+
+  // ---------------------------------------------------
+  // PATIENT
+  // ---------------------------------------------------
+
+  patientId String
+  patient   User   @relation("PatientPrescriptions", fields: [patientId], references: [id])
+
+  // ---------------------------------------------------
+  // BRANCH
+  // ---------------------------------------------------
+
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  // ---------------------------------------------------
+  // UPLOADED PRESCRIPTION FILE
+  // ---------------------------------------------------
+
+  fileUrl  String?
+  fileName String?
+  fileType String?
+
+  // ---------------------------------------------------
+  // NOTES
+  // ---------------------------------------------------
+
+  notes String?
+
+  // ---------------------------------------------------
+  // STATUS
+  // ---------------------------------------------------
+
+  status PrescriptionStatus @default(PENDING)
+
+  // ---------------------------------------------------
+  // ITEMS
+  // ---------------------------------------------------
+
+  items PrescriptionItem[]
+
+  // ---------------------------------------------------
+  // TIMESTAMPS
+  // ---------------------------------------------------
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ---------------------------------------------------
+  // INDEXES
+  // ---------------------------------------------------
+
+  @@index([doctorId])
+  @@index([patientId])
+  @@index([branchId])
+  @@index([status])
+}
+
+// =====================================================
+// PRESCRIPTION ITEM
+// =====================================================
+
+model PrescriptionItem {
+  id String @id @default(uuid())
+
+  // ---------------------------------------------------
+  // PRESCRIPTION
+  // ---------------------------------------------------
+
+  prescriptionId String
+  prescription   Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+
+  // ---------------------------------------------------
+  // MEDICINE
+  // ---------------------------------------------------
+
+  medicineName String
+  dosage       String
+  duration     String
+  quantity     Int
+
+  // ---------------------------------------------------
+  // INDEX
+  // ---------------------------------------------------
+
+  @@index([prescriptionId])
+}
+
+// =====================================================
+// CATEGORY
+// =====================================================
+
+model Category {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String?
+
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// =====================================================
+// PRODUCT
+// =====================================================
+
+model Product {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  stock       Int     @default(0)
+
+  // ---------------------------------------------------
+  // BRANCH
+  // ---------------------------------------------------
+
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  // ---------------------------------------------------
+  // CATEGORY
+  // ---------------------------------------------------
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([branchId])
+  @@index([categoryId])
+}
+
+// =====================================================
+// MEDICINE
+// =====================================================
+
+model Medicine {
+  id          String  @id @default(uuid())
+  name        String
+  brand       String
+  category    String
+  price       Float
+  stock       Int     @default(0)
+  description String?
+
+  // ---------------------------------------------------
+  // BRANCH
+  // ---------------------------------------------------
+
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  // ---------------------------------------------------
+  // ORDER ITEMS
+  // ---------------------------------------------------
+
+  orderItems OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([branchId])
+}
+
+// =====================================================
+// DELIVERY
+// =====================================================
+
+model Delivery {
+  id String @id @default(uuid())
+
+  // ---------------------------------------------------
+  // ORDER
+  // ---------------------------------------------------
+
+  orderNumber     String @unique
+  customerName    String
+  customerPhone   String
+  deliveryAddress String
+
+  // ---------------------------------------------------
+  // PRIORITY
+  // ---------------------------------------------------
+
+  priority DeliveryPriority @default(NORMAL)
+
+  // ---------------------------------------------------
+  // STATUS
+  // ---------------------------------------------------
+
+  status DeliveryStatus @default(PENDING)
+
+  // ---------------------------------------------------
+  // BRANCH
+  // ---------------------------------------------------
+
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  // ---------------------------------------------------
+  // RIDER
+  // ---------------------------------------------------
+
+  riderId String?
+  rider   User?   @relation("RiderDeliveries", fields: [riderId], references: [id], onDelete: SetNull)
+
+  // ---------------------------------------------------
+  // CREATED BY
+  // ---------------------------------------------------
+
+  createdById String?
+  createdBy   User?   @relation("DeliveryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  // ---------------------------------------------------
+  // TIMELINE
+  // ---------------------------------------------------
+
+  assignedAt  DateTime?
+  pickedUpAt  DateTime?
+  deliveredAt DateTime?
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ---------------------------------------------------
+  // INDEXES
+  // ---------------------------------------------------
+
+  @@index([branchId])
+  @@index([riderId])
+  @@index([createdById])
+  @@index([status])
+  @@index([priority])
+}
+
+// =====================================================
+// WAREHOUSE
+// =====================================================
+
+model Warehouse {
+  id       String  @id @default(uuid())
+  name     String
+  code     String  @unique
+  location String
+  phone    String?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ---------------------------------------------------
+  // EMPLOYEES
+  // ---------------------------------------------------
+
+  employees WarehouseEmployee[]
+
+  // ---------------------------------------------------
+  // INVENTORIES
+  // ---------------------------------------------------
+
+  inventories Inventory[]
+
+  @@index([isActive])
+}
+
+// =====================================================
+// WAREHOUSE EMPLOYEE
+// =====================================================
+
+model WarehouseEmployee {
+  id String @id @default(uuid())
+
+  // ---------------------------------------------------
+  // USER
+  // ---------------------------------------------------
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // ---------------------------------------------------
+  // WAREHOUSE
+  // ---------------------------------------------------
+
+  warehouseId String
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  // ---------------------------------------------------
+  // POSITION
+  // ---------------------------------------------------
+
+  position String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([warehouseId])
+}
+
+// =====================================================
+// INVENTORY
+// =====================================================
+
+model Inventory {
+  id        String @id @default(uuid())
+  sku       String @unique
+  name      String
+  category  String
+  stock     Int    @default(0)
+  unitPrice Float  @map("unit_price")
+
+  branchId String? @map("branch_id")
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  warehouseId String?    @map("warehouse_id")
+  warehouse   Warehouse? @relation(fields: [warehouseId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([branchId])
+  @@index([warehouseId])
+  @@map("inventories")
+}
+
+// =====================================================
+// ORDER
+// =====================================================
+
+model Order {
+  id              String      @id @default(uuid())
+  customerId      String
+  totalAmount     Float
+  deliveryFee     Float       @default(0)
+  status          OrderStatus @default(PENDING)
+  deliveryAddress String?
+  paymentMethod   String      @default("COD")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ---------------------------------------------------
+  // CUSTOMER
+  // ---------------------------------------------------
+
+  customer User @relation("CustomerOrders", fields: [customerId], references: [id], onDelete: Cascade)
+
+  // ---------------------------------------------------
+  // ORDER ITEMS
+  // ---------------------------------------------------
+
+  items OrderItem[]
+
+  // ---------------------------------------------------
+  // INDEXES
+  // ---------------------------------------------------
+
+  @@index([customerId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// =====================================================
+// ORDER ITEM
+// =====================================================
+
+model OrderItem {
+  id         String @id @default(uuid())
+  orderId    String
+  medicineId String
+  quantity   Int
+  price      Float
+
+  createdAt DateTime @default(now())
+
+  // ---------------------------------------------------
+  // ORDER
+  // ---------------------------------------------------
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  // ---------------------------------------------------
+  // MEDICINE
+  // ---------------------------------------------------
+
+  medicine Medicine @relation(fields: [medicineId], references: [id], onDelete: Restrict)
+
+  // ---------------------------------------------------
+  // INDEXES
+  // ---------------------------------------------------
+
+  @@index([orderId])
+  @@index([medicineId])
+}

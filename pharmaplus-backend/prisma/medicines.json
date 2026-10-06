@@ -1,0 +1,17 @@
+[
+  { "name": "Panadol Extra 500mg", "brand": "GSK", "category": "Pain Relief", "price": 40.0, "stock": 250 },
+  { "name": "Augmentin 625mg Tablet", "brand": "GSK", "category": "Antibiotic", "price": 280.0, "stock": 120 },
+  { "name": "Brufen 400mg", "brand": "Abbott", "category": "Anti-inflammatory", "price": 55.0, "stock": 300 },
+  { "name": "Risek 20mg Capsule", "brand": "Getz Pharma", "category": "Gastroenterology / PPI", "price": 190.0, "stock": 180 },
+  { "name": "Arinac Forte Tablet", "brand": "Abbott", "category": "Cold & Allergy", "price": 85.0, "stock": 210 },
+  { "name": "Softin 10mg", "brand": "Barrett Hodgson", "category": "Anti-Allergy", "price": 120.0, "stock": 150 },
+  { "name": "Flagyl 400mg", "brand": "Sanofi", "category": "Antibacterial", "price": 65.0, "stock": 400 },
+  { "name": "Disprin 300mg", "brand": "Reckitt", "category": "Analgesic", "price": 25.0, "stock": 500 },
+  { "name": "Cac 1000 Plus", "brand": "GSK", "category": "Vitamin Supplement", "price": 320.0, "stock": 90 },
+  { "name": "Surbex Z", "brand": "Abbott", "category": "Multivitamin", "price": 350.0, "stock": 110 },
+  { "name": "Ponstan 250mg", "brand": "Pfizer", "category": "Pain Relief", "price": 45.0, "stock": 220 },
+  { "name": "Klaricid 250mg", "brand": "Abbott", "category": "Antibiotic", "price": 410.0, "stock": 75 },
+  { "name": "Gravinate 50mg", "brand": "Searle", "category": "Anti-Nausea", "price": 35.0, "stock": 310 },
+  { "name": "Flycol Syrup", "brand": "Searle", "category": "Cough Syrup", "price": 95.0, "stock": 80 },
+  { "name": "Loprin 75mg", "brand": "Highnoon", "category": "Cardiology / Aspirin", "price": 30.0, "stock": 600 }
+]
