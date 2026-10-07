@@ -12,8 +12,8 @@ async function startServer() {
     console.log('✅ Database connected successfully via Prisma!');
 
     // Start Express Server
-    app.listen(PORT, () => {
-      console.log(`🚀 PharmaPlus Server running on http://localhost:${PORT}`);
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 PharmaPlus Server running on port ${PORT}`);
     });
   } catch (error) {
     console.error('❌ Failed to connect to the database:', error.message);
