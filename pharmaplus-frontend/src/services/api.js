@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:5000/api', // Apne backend port/URL ke mutabiq change karein
+  baseURL: 'https://pharmaplus-production-7fa8.up.railway.app/api', // Apne backend port/URL ke mutabiq change karein
   headers: {
     'Content-Type': 'application/json',
   },

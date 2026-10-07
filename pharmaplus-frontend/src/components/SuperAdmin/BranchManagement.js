@@ -23,7 +23,7 @@ const BranchManagement = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [branchToDelete, setBranchToDelete] = useState(null);
 
-  const API_BASE_URL = 'http://localhost:5000/api/v1/branches';
+  const API_BASE_URL = 'https://pharmaplus-production-7fa8.up.railway.app/api/v1/branches';
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('token');

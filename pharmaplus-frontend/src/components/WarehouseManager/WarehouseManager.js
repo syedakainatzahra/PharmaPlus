@@ -21,7 +21,7 @@ const WarehouseManager = () => {
       try {
         const token = localStorage.getItem('token');
         const headers = { Authorization: `Bearer ${token}` };
-        const res = await axios.get('http://localhost:5000/api/v1/warehouse/inventory', { headers });
+        const res = await axios.get('https://pharmaplus-production-7fa8.up.railway.app/api/v1/warehouse/inventory', { headers });
         
         const combinedItems = [
           ...(res.data.medicines || []),

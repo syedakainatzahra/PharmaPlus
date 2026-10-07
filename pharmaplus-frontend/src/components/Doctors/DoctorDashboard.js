@@ -34,7 +34,7 @@ const DoctorDashboard = () => {
   const [appointmentDates, setAppointmentDates] = useState({});
   const [confirmingAppointment, setConfirmingAppointment] = useState(null);
 
-  const API_BASE = 'http://localhost:5000/api/v1';
+  const API_BASE = 'https://pharmaplus-production-7fa8.up.railway.app/api/v1';
 
   const PRESCRIPTION_API = `${API_BASE}/prescriptions`;
   const APPOINTMENT_API = `${API_BASE}/appointments`;

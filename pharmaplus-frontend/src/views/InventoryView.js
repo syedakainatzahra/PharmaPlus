@@ -20,7 +20,7 @@ const InventoryView = ({ token, userRole }) => {
   const fetchBatches = async () => {
     try {
       const activeToken = token || localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/v1/batches', {
+      const res = await fetch('https://pharmaplus-production-7fa8.up.railway.app/api/v1/batches', {
         headers: {
           'Authorization': `Bearer ${activeToken}`,
           'Content-Type': 'application/json'
@@ -68,7 +68,7 @@ const InventoryView = ({ token, userRole }) => {
 
     try {
       const activeToken = token || localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/v1/batches', {
+      const res = await fetch('https://pharmaplus-production-7fa8.up.railway.app/api/v1/batches', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${activeToken}`,

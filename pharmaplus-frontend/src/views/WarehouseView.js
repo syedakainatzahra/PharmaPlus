@@ -18,7 +18,7 @@ const WarehouseView = ({ token }) => {
   const fetchDispatches = async () => {
     try {
       const activeToken = token || localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/v1/warehouse/dispatches', {
+      const res = await fetch('https://pharmaplus-production-7fa8.up.railway.app/api/v1/warehouse/dispatches', {
         headers: {
           'Authorization': `Bearer ${activeToken}`,
           'Content-Type': 'application/json'
@@ -63,7 +63,7 @@ const WarehouseView = ({ token }) => {
 
     try {
       const activeToken = token || localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/v1/warehouse/shipments', {
+      const res = await fetch('https://pharmaplus-production-7fa8.up.railway.app/api/v1/warehouse/shipments', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${activeToken}`,

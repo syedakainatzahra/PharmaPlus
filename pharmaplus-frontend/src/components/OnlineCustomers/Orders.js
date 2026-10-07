@@ -33,7 +33,7 @@ const Orders = () => {
       }
 
       const response = await axios.get(
-        'http://localhost:5000/api/v1/orders/my-orders',
+        'https://pharmaplus-production-7fa8.up.railway.app/api/v1/orders/my-orders',
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -148,7 +148,7 @@ const Orders = () => {
       const token = localStorage.getItem('token');
 
       await axios.patch(
-        `http://localhost:5000/api/v1/orders/${order.id}/cancel`,
+        `https://pharmaplus-production-7fa8.up.railway.app/api/v1/orders/${order.id}/cancel`,
         {},
         {
           headers: {

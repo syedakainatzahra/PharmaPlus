@@ -18,7 +18,7 @@ const Products = ({ setActiveTab, setCartCount }) => {
       setError("");
 
       const response = await fetch(
-        "http://localhost:5000/api/v1/medicines"
+        "https://pharmaplus-production-7fa8.up.railway.app/api/v1/medicines"
       );
 
       const data = await response.json();

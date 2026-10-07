@@ -36,7 +36,7 @@ const Navbar = ({ cartCount = 0, setActiveTab }) => {
     return user.profileImage;
   }
 
-  return `http://localhost:5000${user.profileImage}`;
+  return `https://pharmaplus-production-7fa8.up.railway.app${user.profileImage}`;
 };
 
   // ================================

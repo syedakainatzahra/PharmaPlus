@@ -7,7 +7,7 @@ import {
   FiArrowLeft,
 } from "react-icons/fi";
 
-const API_BASE_URL = "http://localhost:5000/api/v1";
+const API_BASE_URL = "https://pharmaplus-production-7fa8.up.railway.app/api/v1";
 
 const Doctors = ({ setActiveTab }) => {
   const [doctors, setDoctors] = useState([]);

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/v1/admin";
+const API_URL = "https://pharmaplus-production-7fa8.up.railway.app/api/v1/admin";
 
 
 // Get all users

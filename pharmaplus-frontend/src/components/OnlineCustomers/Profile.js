@@ -9,7 +9,7 @@ import {
   FiCamera,
 } from 'react-icons/fi';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = 'https://pharmaplus-production-7fa8.up.railway.app';
 
 // =====================================================
 // PROFILE

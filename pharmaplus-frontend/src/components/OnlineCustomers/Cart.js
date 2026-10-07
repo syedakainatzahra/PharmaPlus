@@ -128,7 +128,7 @@ const Cart = ({ setActiveTab, setCartCount }) => {
       }));
 
       const response = await axios.post(
-        'http://localhost:5000/api/v1/orders',
+        'https://pharmaplus-production-7fa8.up.railway.app/api/v1/orders',
         {
           items: orderItems,
           deliveryAddress: deliveryAddress.trim(),

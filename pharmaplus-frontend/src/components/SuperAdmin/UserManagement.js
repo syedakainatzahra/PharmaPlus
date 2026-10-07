@@ -29,7 +29,7 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch('http://localhost:5000/api/v1/users', {
+      const response = await fetch('https://pharmaplus-production-7fa8.up.railway.app/api/v1/users', {
         headers: { 
           'Authorization': `Bearer ${token}` 
         }
@@ -73,7 +73,7 @@ const UserManagement = () => {
   const handleUpdateStatus = async (userId, newStatus) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:5000/api/v1/users/${userId}/status`, {
+      const response = await fetch(`https://pharmaplus-production-7fa8.up.railway.app/api/v1/users/${userId}/status`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',
@@ -96,7 +96,7 @@ const UserManagement = () => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/v1/users/${userId}`, {
+      const response = await fetch(`https://pharmaplus-production-7fa8.up.railway.app/api/v1/users/${userId}`, {
         method: 'DELETE',
         headers: { 
           'Authorization': `Bearer ${token}` 

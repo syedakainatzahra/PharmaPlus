@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FiSearch, FiShoppingCart, FiX, FiArrowRight } from "react-icons/fi";
 
-const API_URL = "http://localhost:5000/api/v1";
+const API_URL = "https://pharmaplus-production-7fa8.up.railway.app/api/v1";
 
 const Medicines = ({ setActiveTab, setCartCount }) => {
   const [medicines, setMedicines] = useState([]);

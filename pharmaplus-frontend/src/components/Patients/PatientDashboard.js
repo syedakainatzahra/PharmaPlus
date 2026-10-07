@@ -22,7 +22,7 @@ const PatientDashboard = () => {
   // Fetch Requests
   const fetchMyRequests = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/v1/appointments/my-requests', {
+      const response = await fetch('https://pharmaplus-production-7fa8.up.railway.app/api/v1/appointments/my-requests', {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -35,7 +35,7 @@ const PatientDashboard = () => {
   // Fetch Prescriptions
   const fetchMyPrescriptions = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/v1/prescriptions', {
+      const response = await fetch('https://pharmaplus-production-7fa8.up.railway.app/api/v1/prescriptions', {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -57,7 +57,7 @@ const PatientDashboard = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/v1/appointments/request', {
+      const response = await fetch('https://pharmaplus-production-7fa8.up.railway.app/api/v1/appointments/request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

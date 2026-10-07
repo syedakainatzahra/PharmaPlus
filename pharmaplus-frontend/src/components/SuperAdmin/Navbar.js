@@ -37,7 +37,7 @@ const Navbar = ({ onSearch }) => {
   const fetchNotifications = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/v1/admin/notifications', {
+      const response = await fetch('https://pharmaplus-production-7fa8.up.railway.app/api/v1/admin/notifications', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -56,7 +56,7 @@ const Navbar = ({ onSearch }) => {
   const fetchBranches = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/v1/branches/all', {
+      const response = await fetch('https://pharmaplus-production-7fa8.up.railway.app/api/v1/branches/all', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -77,7 +77,7 @@ const Navbar = ({ onSearch }) => {
   const handleAccept = async (userId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/v1/admin/users/${userId}/status`, {
+      const response = await fetch(`https://pharmaplus-production-7fa8.up.railway.app/api/v1/admin/users/${userId}/status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -101,7 +101,7 @@ const Navbar = ({ onSearch }) => {
   const handleDecline = async (userId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/v1/admin/users/${userId}`, {
+      const response = await fetch(`https://pharmaplus-production-7fa8.up.railway.app/api/v1/admin/users/${userId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -125,7 +125,7 @@ const Navbar = ({ onSearch }) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5000/api/v1/admin/search?q=${encodeURIComponent(searchQuery)}`, {
+        const response = await fetch(`https://pharmaplus-production-7fa8.up.railway.app/api/v1/admin/search?q=${encodeURIComponent(searchQuery)}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -166,7 +166,7 @@ const Navbar = ({ onSearch }) => {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem('token');
-      await fetch('http://localhost:5000/api/v1/auth/logout', {
+      await fetch('https://pharmaplus-production-7fa8.up.railway.app/api/v1/auth/logout', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

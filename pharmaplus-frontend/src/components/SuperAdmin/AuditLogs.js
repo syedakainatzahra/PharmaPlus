@@ -28,9 +28,9 @@ const AuditLogs = () => {
 
         // Parallel API calls for logs, branches, and users
         const [logsRes, branchesRes, usersRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/v1/admin/audit-logs', { headers }),
-          axios.get('http://localhost:5000/api/v1/branches/all', { headers }),
-          axios.get('http://localhost:5000/api/v1/users', { headers }) // Adjust endpoint if route is /all or /
+          axios.get('https://pharmaplus-production-7fa8.up.railway.app/api/v1/admin/audit-logs', { headers }),
+          axios.get('https://pharmaplus-production-7fa8.up.railway.app/api/v1/branches/all', { headers }),
+          axios.get('https://pharmaplus-production-7fa8.up.railway.app/api/v1/users', { headers }) // Adjust endpoint if route is /all or /
         ]);
         
         // Format Audit Logs

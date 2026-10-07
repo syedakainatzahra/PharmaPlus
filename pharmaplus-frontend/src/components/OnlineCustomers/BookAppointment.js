@@ -5,7 +5,7 @@ import {
   FiUser,
 } from "react-icons/fi";
 
-const API_BASE_URL = "http://localhost:5000/api/v1";
+const API_BASE_URL = "https://pharmaplus-production-7fa8.up.railway.app/api/v1";
 
 const BookAppointment = ({ setActiveTab, selectedDoctorId = "" }) => {
   const [doctors, setDoctors] = useState([]);

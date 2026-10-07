@@ -41,8 +41,8 @@ const AuthForm = ({ onAuthSuccess, initialMode = "login" }) => {
     });
 
     const endpoint = isLogin
-      ? "http://localhost:5000/api/v1/auth/login"
-      : "http://localhost:5000/api/v1/auth/signup";
+      ? "https://pharmaplus-production-7fa8.up.railway.app/api/v1/auth/login"
+      : "https://pharmaplus-production-7fa8.up.railway.app/api/v1/auth/signup";
 
     // Role is NOT sent from frontend.
     // Backend decides signup role = CUSTOMER.

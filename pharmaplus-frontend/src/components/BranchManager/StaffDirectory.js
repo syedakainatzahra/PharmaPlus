@@ -1,33 +1,29 @@
-import React, { useState,useEffect } from 'react';
-import Sidebar from './Sidebar';
-import Navbar from './Navbar';
-import { FiSearch, FiUsers } from 'react-icons/fi';
+import React, { useEffect, useState } from "react";
+import Sidebar from "./Sidebar";
+import Navbar from "./Navbar";
+import { FiSearch } from "react-icons/fi";
 
-const StaffDirectory = () => {
-  const [activeTab, setActiveTab] = useState('all');
-  const [searchFilter, setSearchFilter] = useState('');
-
-  const [staffMembers, setStaffMembers] = useState([]);
+function StaffDirectory() {
+  const [staffMembers, setStaffMembers] = useState([])
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [searchFilter, setSearchFilter] = useState("");
+  const [activeTab, setActiveTab] = useState("all");
 
+  // =========================
+  // FETCH BRANCH STAFF
+  // =========================
   useEffect(() => {
     const fetchStaff = async () => {
       try {
-        const token = localStorage.getItem('token');
+        setLoading(true);
 
-        if (!token) {
-          setError('Authentication token not found.');
-          return;
-        }
+        const token = localStorage.getItem("token");
 
         const response = await fetch(
-          'http://localhost:5000/api/v1/branch-managers/staff',
+          "https://pharmaplus-production-7fa8.up.railway.app/api/v1/branch-managers/staff",
           {
-            method: 'GET',
             headers: {
               Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
             },
           }
         );
@@ -35,27 +31,42 @@ const StaffDirectory = () => {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || 'Failed to load staff');
+          throw new Error(data.message || "Failed to fetch staff");
         }
 
         const formattedStaff = (data.staff || []).map((member, index) => ({
-          id: member.employeeId || `STAFF-${String(index + 1).padStart(3, '0')}`,
-          name: member.fullName,
-          role: member.role,
-          dept: getDepartment(member.role),
-          phone: member.phone || '—',
-          email: member.email,
-          shift: '—',
-          today: '—',
-          attendance: '—',
-          status: formatStatus(member.status),
-          avatarBg: getAvatarColor(index),
+          id:
+            member.employeeId ||
+            `STAFF-${String(index + 1).padStart(3, "0")}`,
+
+          name:
+            member.fullName?.trim() ||
+            member.email?.split("@")[0] ||
+            "Unknown Staff",
+
+          role: formatRole(member.role),
+
+          department: getDepartment(member.role),
+
+          phone: member.phone || "—",
+
+          email: member.email || "—",
+
+          shift: "—",
+
+          today: "—",
+
+          attendance: "—",
+
+          status: formatAccountStatus(member.status),
+
+          avatarColor: getAvatarColor(index),
         }));
 
         setStaffMembers(formattedStaff);
-      } catch (err) {
-        console.error('Staff Directory Error:', err);
-        setError(err.message);
+      } catch (error) {
+        console.error("Staff fetch error:", error);
+        setStaffMembers([]);
       } finally {
         setLoading(false);
       }
@@ -64,477 +75,695 @@ const StaffDirectory = () => {
     fetchStaff();
   }, []);
 
+  // =========================
+  // ROLE FORMATTER
+  // =========================
+  const formatRole = (role) => {
+    if (!role) return "Staff";
+
+    return role
+      .toLowerCase()
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  // =========================
+  // DEPARTMENT
+  // =========================
   const getDepartment = (role) => {
     switch (role) {
-      case 'DOCTOR':
-        return 'Medical';
-      case 'PHARMACIST':
-        return 'Pharmacy';
-      case 'RECEPTIONIST':
-        return 'Administration';
-      case 'BRANCH_MANAGER':
-        return 'Management';
-      case 'DELIVERY_RIDER':
-        return 'Logistics';
+      case "DOCTOR":
+        return "Medical";
+
+      case "PHARMACIST":
+        return "Pharmacy";
+
+      case "RECEPTIONIST":
+        return "Front Desk";
+
+      case "BRANCH_MANAGER":
+        return "Management";
+
+      case "DELIVERY_RIDER":
+        return "Delivery";
+
+      case "WAREHOUSE_MANAGER":
+      case "WAREHOUSE_EMPLOYEE":
+        return "Warehouse";
+
+      case "SECURITY_GUARD":
+        return "Security";
+
       default:
-        return 'Staff';
+        return "General";
     }
   };
 
-  const formatStatus = (status) => {
-    if (!status) return 'Unknown';
-
+  // =========================
+  // ACCOUNT STATUS
+  // =========================
+  const formatAccountStatus = (status) => {
     switch (status) {
-      case 'ACTIVE':
-        return 'Present';
-      case 'ON_LEAVE':
-        return 'On Leave';
-      case 'INACTIVE':
-      case 'SUSPENDED':
-        return 'Absent';
+      case "ACTIVE":
+        return "Active";
+
+      case "INACTIVE":
+        return "Inactive";
+
+      case "ON_LEAVE":
+        return "On Leave";
+
+      case "SUSPENDED":
+        return "Inactive";
+
+      case "PENDING":
+        return "Inactive";
+
+      case "REJECTED":
+        return "Inactive";
+
       default:
-        return status;
+        return "Inactive";
     }
   };
 
+  // =========================
+  // AVATAR COLORS
+  // =========================
   const getAvatarColor = (index) => {
     const colors = [
-      '#2563eb',
-      '#7c3aed',
-      '#059669',
-      '#d97706',
-      '#dc2626',
-      '#0284c7',
-      '#8b5cf6',
-      '#e11d48',
+      "#dbeafe",
+      "#dcfce7",
+      "#fef3c7",
+      "#fce7f3",
+      "#ede9fe",
+      "#cffafe",
     ];
 
     return colors[index % colors.length];
   };
 
+  // =========================
+  // FILTER STAFF
+  // =========================
   const filteredStaff = staffMembers.filter((member) => {
+    const search = searchFilter.toLowerCase();
+
     const matchesSearch =
-      member.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
-      member.role.toLowerCase().includes(searchFilter.toLowerCase()) ||
-      member.id.toLowerCase().includes(searchFilter.toLowerCase());
+      (member.name || "Unknown Staff").toLowerCase().includes(search) ||
+      (member.role || "Staff").toLowerCase().includes(search) ||
+      (member.id || "").toLowerCase().includes(search) ||
+      (member.email || "").toLowerCase().includes(search);
 
-    if (activeTab === 'present') {
-      return matchesSearch && member.status === 'Present';
+    if (activeTab === "active") {
+      return matchesSearch && member.status === "Active";
     }
 
-    if (activeTab === 'absent') {
-      return matchesSearch && member.status === 'Absent';
+    if (activeTab === "inactive") {
+      return matchesSearch && member.status === "Inactive";
     }
 
-    if (activeTab === 'leave') {
-      return matchesSearch && member.status === 'On Leave';
+    if (activeTab === "leave") {
+      return matchesSearch && member.status === "On Leave";
     }
 
     return matchesSearch;
   });
 
+  // =========================
+  // COUNTS
+  // =========================
   const totalStaff = staffMembers.length;
-  const presentStaff = staffMembers.filter(
-    (member) => member.status === 'Present'
+
+  const activeStaff = staffMembers.filter(
+    (member) => member.status === "Active"
   ).length;
 
-  const absentStaff = staffMembers.filter(
-    (member) => member.status === 'Absent'
+  const inactiveStaff = staffMembers.filter(
+    (member) => member.status === "Inactive"
   ).length;
 
   const leaveStaff = staffMembers.filter(
-    (member) => member.status === 'On Leave'
+    (member) => member.status === "On Leave"
   ).length;
 
+  // =========================
+  // LOADING
+  // =========================
   if (loading) {
     return (
-      <div style={styles.layoutContainer}>
+      <div
+        style={{
+          display: "flex",
+          minHeight: "100vh",
+          background: "#f8fafc",
+        }}
+      >
         <Sidebar />
 
-        <main style={styles.mainContent}>
+        <div style={{ flex: 1 }}>
           <Navbar />
 
-          <div style={styles.contentBody}>
-            <h1 style={styles.pageTitle}>Staff Directory</h1>
-            <p style={styles.pageSub}>Loading branch staff...</p>
+          <div
+            style={{
+              padding: "40px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: "70vh",
+              color: "#64748b",
+              fontSize: "16px",
+            }}
+          >
+            Loading staff directory...
           </div>
-        </main>
+        </div>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div style={styles.layoutContainer}>
-        <Sidebar />
-
-        <main style={styles.mainContent}>
-          <Navbar />
-
-          <div style={styles.contentBody}>
-            <h1 style={styles.pageTitle}>Staff Directory</h1>
-
-            <p
-              style={{
-                ...styles.pageSub,
-                color: '#ef4444',
-              }}
-            >
-              {error}
-            </p>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
+  // =========================
+  // MAIN UI
+  // =========================
   return (
-    <div style={styles.layoutContainer}>
+    <div
+      style={{
+        display: "flex",
+        minHeight: "100vh",
+        background: "#f8fafc",
+      }}
+    >
       <Sidebar />
 
-      <main style={styles.mainContent}>
+      <div
+        style={{
+          flex: 1,
+          minWidth: 0,
+        }}
+      >
         <Navbar />
 
-        <div style={styles.contentBody}>
-
-          <div style={styles.pageHeader}>
-            <h1 style={styles.pageTitle}>Staff Directory</h1>
-
-            <p style={styles.pageSub}>
-              All {totalStaff} employees assigned to your branch
-            </p>
-          </div>
-
-          <div style={styles.filterBar}>
-
-            <div style={styles.tabButtons}>
-
-              <button
+        <main
+          style={{
+            padding: "28px 32px",
+          }}
+        >
+          {/* =========================
+              HEADER
+          ========================= */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "24px",
+              gap: "20px",
+              flexWrap: "wrap",
+            }}
+          >
+            <div>
+              <h1
                 style={{
-                  ...styles.tabBtn,
-                  ...(activeTab === 'all' ? styles.activeTab : {}),
+                  margin: 0,
+                  fontSize: "26px",
+                  fontWeight: "700",
+                  color: "#0f172a",
                 }}
-                onClick={() => setActiveTab('all')}
               >
-                <span
-                  style={{
-                    ...styles.tabCount,
-                    ...(activeTab === 'all'
-                      ? styles.activeCount
-                      : {}),
-                  }}
-                >
-                  {totalStaff}
-                </span>
+                Staff Directory
+              </h1>
 
-                All Staff
-              </button>
-
-              <button
+              <p
                 style={{
-                  ...styles.tabBtn,
-                  ...(activeTab === 'present'
-                    ? styles.activeTab
-                    : {}),
+                  marginTop: "6px",
+                  marginBottom: 0,
+                  color: "#64748b",
+                  fontSize: "14px",
                 }}
-                onClick={() => setActiveTab('present')}
               >
-                <span
-                  style={{
-                    ...styles.tabCount,
-                    ...(activeTab === 'present'
-                      ? styles.activeCount
-                      : {}),
-                  }}
-                >
-                  {presentStaff}
-                </span>
-
-                Present
-              </button>
-
-              <button
-                style={{
-                  ...styles.tabBtn,
-                  ...(activeTab === 'absent'
-                    ? styles.activeTab
-                    : {}),
-                }}
-                onClick={() => setActiveTab('absent')}
-              >
-                <span
-                  style={{
-                    ...styles.tabCount,
-                    ...(activeTab === 'absent'
-                      ? styles.activeCount
-                      : {}),
-                  }}
-                >
-                  {absentStaff}
-                </span>
-
-                Absent
-              </button>
-
-              <button
-                style={{
-                  ...styles.tabBtn,
-                  ...(activeTab === 'leave'
-                    ? styles.activeTab
-                    : {}),
-                }}
-                onClick={() => setActiveTab('leave')}
-              >
-                <span
-                  style={{
-                    ...styles.tabCount,
-                    ...(activeTab === 'leave'
-                      ? styles.activeCount
-                      : {}),
-                  }}
-                >
-                  {leaveStaff}
-                </span>
-
-                On Leave
-              </button>
-
+                Manage and view staff members assigned to your branch.
+              </p>
             </div>
 
-            <div style={styles.searchBox}>
-              <FiSearch size={16} color="#94a3b8" />
+            {/* SEARCH */}
+            <div
+              style={{
+                position: "relative",
+                width: "280px",
+              }}
+            >
+              <FiSearch
+                size={18}
+                style={{
+                  position: "absolute",
+                  left: "13px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "#94a3b8",
+                }}
+              />
 
               <input
                 type="text"
                 placeholder="Search staff..."
                 value={searchFilter}
                 onChange={(e) => setSearchFilter(e.target.value)}
-                style={styles.searchInput}
+                style={{
+                  width: "100%",
+                  height: "42px",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "8px",
+                  padding: "0 14px 0 40px",
+                  outline: "none",
+                  fontSize: "14px",
+                  background: "#ffffff",
+                  boxSizing: "border-box",
+                }}
               />
             </div>
-
           </div>
 
-          <div style={styles.tableCard}>
+          {/* =========================
+              STAT CARDS
+          ========================= */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+              gap: "16px",
+              marginBottom: "24px",
+            }}
+          >
+            {/* TOTAL */}
+            <div
+              style={{
+                background: "#ffffff",
+                border: "1px solid #e2e8f0",
+                borderRadius: "12px",
+                padding: "20px",
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  color: "#64748b",
+                  fontSize: "13px",
+                }}
+              >
+                Total Staff
+              </p>
 
-            <table style={styles.table}>
+              <h2
+                style={{
+                  margin: "8px 0 0",
+                  fontSize: "26px",
+                  color: "#0f172a",
+                }}
+              >
+                {totalStaff}
+              </h2>
+            </div>
 
-              <thead>
-                <tr style={styles.tableHeaderRow}>
-                  <th style={styles.th}>EMPLOYEE</th>
-                  <th style={styles.th}>ROLE & DEPT</th>
-                  <th style={styles.th}>CONTACT</th>
-                  <th style={styles.th}>SHIFT</th>
-                  <th style={styles.th}>TODAY</th>
-                  <th style={styles.th}>ATTENDANCE</th>
-                  <th style={styles.th}>STATUS</th>
-                </tr>
-              </thead>
+            {/* ACTIVE */}
+            <div
+              style={{
+                background: "#ffffff",
+                border: "1px solid #e2e8f0",
+                borderRadius: "12px",
+                padding: "20px",
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  color: "#64748b",
+                  fontSize: "13px",
+                }}
+              >
+                Active
+              </p>
 
-              <tbody>
+              <h2
+                style={{
+                  margin: "8px 0 0",
+                  fontSize: "26px",
+                  color: "#16a34a",
+                }}
+              >
+                {activeStaff}
+              </h2>
+            </div>
 
-                {filteredStaff.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan="7"
-                      style={{
-                        textAlign: 'center',
-                        padding: '40px',
-                        color: '#64748b',
-                      }}
-                    >
-                      No staff members found.
-                    </td>
+            {/* INACTIVE */}
+            <div
+              style={{
+                background: "#ffffff",
+                border: "1px solid #e2e8f0",
+                borderRadius: "12px",
+                padding: "20px",
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  color: "#64748b",
+                  fontSize: "13px",
+                }}
+              >
+                Inactive
+              </p>
+
+              <h2
+                style={{
+                  margin: "8px 0 0",
+                  fontSize: "26px",
+                  color: "#dc2626",
+                }}
+              >
+                {inactiveStaff}
+              </h2>
+            </div>
+
+            {/* ON LEAVE */}
+            <div
+              style={{
+                background: "#ffffff",
+                border: "1px solid #e2e8f0",
+                borderRadius: "12px",
+                padding: "20px",
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  color: "#64748b",
+                  fontSize: "13px",
+                }}
+              >
+                On Leave
+              </p>
+
+              <h2
+                style={{
+                  margin: "8px 0 0",
+                  fontSize: "26px",
+                  color: "#d97706",
+                }}
+              >
+                {leaveStaff}
+              </h2>
+            </div>
+          </div>
+
+          {/* =========================
+              FILTER TABS
+          ========================= */}
+          <div
+            style={{
+              display: "flex",
+              gap: "8px",
+              marginBottom: "16px",
+              flexWrap: "wrap",
+            }}
+          >
+            {[
+              { key: "all", label: "All Staff" },
+              { key: "active", label: "Active" },
+              { key: "inactive", label: "Inactive" },
+              { key: "leave", label: "On Leave" },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                style={{
+                  padding: "9px 16px",
+                  borderRadius: "7px",
+                  border:
+                    activeTab === tab.key
+                      ? "1px solid #2563eb"
+                      : "1px solid #e2e8f0",
+                  background:
+                    activeTab === tab.key ? "#2563eb" : "#ffffff",
+                  color:
+                    activeTab === tab.key ? "#ffffff" : "#475569",
+                  cursor: "pointer",
+                  fontSize: "13px",
+                  fontWeight: "500",
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* =========================
+              STAFF TABLE
+          ========================= */}
+          <div
+            style={{
+              background: "#ffffff",
+              border: "1px solid #e2e8f0",
+              borderRadius: "12px",
+              overflowX: "auto",
+            }}
+          >
+            {filteredStaff.length === 0 ? (
+              <div
+                style={{
+                  padding: "60px 20px",
+                  textAlign: "center",
+                  color: "#64748b",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    color: "#334155",
+                    marginBottom: "6px",
+                  }}
+                >
+                  No staff found
+                </div>
+
+                <div style={{ fontSize: "13px" }}>
+                  Try changing your search or filter.
+                </div>
+              </div>
+            ) : (
+              <table
+                style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  minWidth: "1000px",
+                }}
+              >
+                <thead>
+                  <tr
+                    style={{
+                      background: "#f8fafc",
+                      borderBottom: "1px solid #e2e8f0",
+                    }}
+                  >
+                    <th style={headerStyle}>Employee</th>
+                    <th style={headerStyle}>Role / Department</th>
+                    <th style={headerStyle}>Contact</th>
+                    <th style={headerStyle}>Shift</th>
+                    <th style={headerStyle}>Today</th>
+                    <th style={headerStyle}>Attendance</th>
+                    <th style={headerStyle}>Status</th>
                   </tr>
-                ) : (
-                  filteredStaff.map((member) => (
+                </thead>
+
+                <tbody>
+                  {filteredStaff.map((member) => (
                     <tr
                       key={member.id}
-                      style={styles.tableRow}
+                      style={{
+                        borderBottom: "1px solid #f1f5f9",
+                      }}
                     >
-
-                      <td style={styles.td}>
-                        <div style={styles.employeeCell}>
-
+                      {/* EMPLOYEE */}
+                      <td style={cellStyle}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                          }}
+                        >
                           <div
                             style={{
-                              ...styles.avatar,
-                              backgroundColor: member.avatarBg,
+                              width: "40px",
+                              height: "40px",
+                              borderRadius: "50%",
+                              background: member.avatarColor,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: "#334155",
+                              fontWeight: "700",
+                              fontSize: "13px",
+                              flexShrink: 0,
                             }}
                           >
-                            {member.name
-                              .split(' ')
+                            {(member.name || "Unknown Staff")
+                              .trim()
+                              .split(/\s+/)
+                              .filter(Boolean)
                               .map((n) => n[0])
-                              .join('')
-                              .slice(0, 2)}
+                              .join("")
+                              .slice(0, 2)
+                              .toUpperCase()}
                           </div>
 
                           <div>
-                            <p style={styles.empName}>
-                              {member.name}
-                            </p>
-
-                            <span style={styles.empId}>
-                              {member.id}
-                            </span>
-                          </div>
-
-                        </div>
-                      </td>
-
-                      <td style={styles.td}>
-                        <p style={styles.empRole}>
-                          {member.role}
-                        </p>
-
-                        <span style={styles.empDept}>
-                          {member.dept}
-                        </span>
-                      </td>
-
-                      <td style={styles.td}>
-                        <p style={styles.empPhone}>
-                          {member.phone}
-                        </p>
-
-                        <span style={styles.empEmail}>
-                          {member.email}
-                        </span>
-                      </td>
-
-                      <td style={styles.td}>
-                        <span style={styles.shiftText}>
-                          {member.shift}
-                        </span>
-                      </td>
-
-                      <td style={styles.td}>
-                        <span
-                          style={{
-                            ...styles.todayText,
-                            color:
-                              member.today === '—'
-                                ? '#94a3b8'
-                                : '#10b981',
-                          }}
-                        >
-                          {member.today}
-                        </span>
-                      </td>
-
-                      <td style={styles.td}>
-                        <div style={styles.attendanceWrapper}>
-
-                          <div style={styles.progressBarBg}>
                             <div
                               style={{
-                                ...styles.progressBarFill,
-                                width:
-                                  member.attendance === '—'
-                                    ? '0%'
-                                    : member.attendance,
-                                backgroundColor:
-                                  member.attendance !== '—' &&
-                                  parseInt(member.attendance) > 90
-                                    ? '#10b981'
-                                    : '#f59e0b',
+                                fontWeight: "600",
+                                color: "#0f172a",
+                                fontSize: "14px",
                               }}
-                            />
+                            >
+                              {member.name || "Unknown Staff"}
+                            </div>
+
+                            <div
+                              style={{
+                                color: "#94a3b8",
+                                fontSize: "12px",
+                                marginTop: "3px",
+                              }}
+                            >
+                              {member.id}
+                            </div>
                           </div>
-
-                          <span style={styles.attendancePct}>
-                            {member.attendance}
-                          </span>
-
                         </div>
                       </td>
 
-                      <td style={styles.td}>
-
-                        <span
+                      {/* ROLE */}
+                      <td style={cellStyle}>
+                        <div
                           style={{
-                            ...styles.statusBadge,
-                            backgroundColor:
-                              member.status === 'Present'
-                                ? '#f0fdf4'
-                                : member.status === 'Absent'
-                                ? '#fef2f2'
-                                : '#fffbeb',
-
-                            color:
-                              member.status === 'Present'
-                                ? '#16a34a'
-                                : member.status === 'Absent'
-                                ? '#ef4444'
-                                : '#d97706',
+                            fontWeight: "500",
+                            color: "#334155",
+                            fontSize: "13px",
                           }}
                         >
-                          {member.status}
-                        </span>
+                          {member.role || "Staff"}
+                        </div>
 
+                        <div
+                          style={{
+                            color: "#94a3b8",
+                            fontSize: "12px",
+                            marginTop: "3px",
+                          }}
+                        >
+                          {member.department || "General"}
+                        </div>
                       </td>
 
+                      {/* CONTACT */}
+                      <td style={cellStyle}>
+                        <div
+                          style={{
+                            color: "#334155",
+                            fontSize: "13px",
+                          }}
+                        >
+                          {member.phone || "—"}
+                        </div>
+
+                        <div
+                          style={{
+                            color: "#64748b",
+                            fontSize: "12px",
+                            marginTop: "3px",
+                          }}
+                        >
+                          {member.email || "—"}
+                        </div>
+                      </td>
+
+                      {/* SHIFT */}
+                      <td style={cellStyle}>
+                        <span style={{ color: "#64748b", fontSize: "13px" }}>
+                          {member.shift || "—"}
+                        </span>
+                      </td>
+
+                      {/* TODAY */}
+                      <td style={cellStyle}>
+                        <span style={{ color: "#64748b", fontSize: "13px" }}>
+                          {member.today || "—"}
+                        </span>
+                      </td>
+
+                      {/* ATTENDANCE */}
+                      <td style={cellStyle}>
+                        <span style={{ color: "#64748b", fontSize: "13px" }}>
+                          {member.attendance || "—"}
+                        </span>
+                      </td>
+
+                      {/* STATUS */}
+                      <td style={cellStyle}>
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            padding: "5px 10px",
+                            borderRadius: "999px",
+                            fontSize: "12px",
+                            fontWeight: "600",
+                            background:
+                              member.status === "Active"
+                                ? "#dcfce7"
+                                : member.status === "On Leave"
+                                ? "#fef3c7"
+                                : "#fee2e2",
+                            color:
+                              member.status === "Active"
+                                ? "#15803d"
+                                : member.status === "On Leave"
+                                ? "#b45309"
+                                : "#b91c1c",
+                          }}
+                        >
+                          {member.status || "Inactive"}
+                        </span>
+                      </td>
                     </tr>
-                  ))
-                )}
-
-              </tbody>
-
-            </table>
-
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
-
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
+}
+
+// =========================
+// TABLE STYLES
+// =========================
+
+const headerStyle = {
+  padding: "14px 16px",
+  textAlign: "left",
+  fontSize: "12px",
+  fontWeight: "600",
+  color: "#64748b",
+  whiteSpace: "nowrap",
 };
-const styles = {
-  layoutContainer: { display: 'flex', height: '100vh', backgroundColor: '#f8fafc', fontFamily: 'sans-serif', overflow: 'hidden' },
-  mainContent: { flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' },
-  contentBody: { padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: '20px' },
-  
-  pageHeader: { display: 'flex', flexDirection: 'column', gap: '4px' },
-  pageTitle: { fontSize: '20px', fontWeight: '800', color: '#0f172a', margin: 0 },
-  pageSub: { fontSize: '13px', color: '#64748b', margin: 0 },
 
-  filterBar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  tabButtons: { display: 'flex', gap: '8px' },
-  tabBtn: { display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', color: '#64748b', fontSize: '13px', fontWeight: '600', cursor: 'pointer' },
-  activeTab: { backgroundColor: '#ffffff', borderColor: '#2563eb', color: '#2563eb' },
-  tabCount: { backgroundColor: '#f1f5f9', color: '#64748b', fontSize: '11px', fontWeight: '700', padding: '2px 6px', borderRadius: '6px' },
-  activeCount: { backgroundColor: '#eff6ff', color: '#2563eb' },
-
-  searchBox: { display: 'flex', alignItems: 'center', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', padding: '8px 14px', borderRadius: '8px', gap: '10px', width: '260px' },
-  searchInput: { border: 'none', backgroundColor: 'transparent', outline: 'none', fontSize: '13px', width: '100%', color: '#0f172a' },
-
-  tableCard: { backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' },
-  table: { width: '100%', borderCollapse: 'collapse', textAlign: 'left' },
-  tableHeaderRow: { backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' },
-  th: { padding: '12px 16px', fontSize: '11px', fontWeight: '700', color: '#64748b', letterSpacing: '0.05em' },
-  tableRow: { borderBottom: '1px solid #f1f5f9' },
-  td: { padding: '14px 16px', verticalAlign: 'middle' },
-
-  employeeCell: { display: 'flex', alignItems: 'center', gap: '12px' },
-  avatar: { width: '36px', height: '36px', borderRadius: '50%', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 },
-  empName: { fontSize: '13px', fontWeight: '700', color: '#0f172a', margin: 0, lineHeight: '1.2' },
-  empId: { fontSize: '11px', color: '#94a3b8' },
-
-  empRole: { fontSize: '13px', fontWeight: '600', color: '#0f172a', margin: 0, lineHeight: '1.2' },
-  empDept: { fontSize: '11px', color: '#94a3b8' },
-
-  empPhone: { fontSize: '13px', fontWeight: '600', color: '#334155', margin: 0, lineHeight: '1.2' },
-  empEmail: { fontSize: '11px', color: '#94a3b8' },
-
-  shiftText: { fontSize: '13px', color: '#475569', fontWeight: '500' },
-  todayText: { fontSize: '13px', fontWeight: '700' },
-
-  attendanceWrapper: { display: 'flex', alignItems: 'center', gap: '10px', width: '140px' },
-  progressBarBg: { flex: 1, height: '6px', backgroundColor: '#f1f5f9', borderRadius: '3px', overflow: 'hidden' },
-  progressBarFill: { height: '100%', borderRadius: '3px' },
-  attendancePct: { fontSize: '12px', fontWeight: '700', color: '#475569', width: '32px' },
-
-  statusBadge: { fontSize: '11px', fontWeight: '700', padding: '4px 10px', borderRadius: '6px', letterSpacing: '0.05em' }
+const cellStyle = {
+  padding: "16px",
+  textAlign: "left",
+  verticalAlign: "middle",
 };
 
 export default StaffDirectory;

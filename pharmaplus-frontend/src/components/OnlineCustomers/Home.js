@@ -24,7 +24,7 @@ import homeDeliveryImg from "../../assets/services/home-delivery.png";
 import diagnosticServicesImg from "../../assets/services/diagnostic-services.png";
 import healthWellnessImg from "../../assets/services/health-wellness.png";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://pharmaplus-production-7fa8.up.railway.app";
 
 const Home = ({ setActiveTab, setCartCount }) => {
   // =========================================================

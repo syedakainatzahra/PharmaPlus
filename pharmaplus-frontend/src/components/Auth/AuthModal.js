@@ -26,8 +26,8 @@ const AuthModal = ({ onLogin }) => {
     // Endpoint Fix: Removed /auth/ to align with the direct routes (/login and /signup)
   // Sahi Endpoint (Bina extra /auth/ ke)
    const endpoint = isLogin
-     ? 'http://localhost:5000/api/v1/auth/login'
-     : 'http://localhost:5000/api/v1/auth/signup';
+     ? 'https://pharmaplus-production-7fa8.up.railway.app/api/v1/auth/login'
+     : 'https://pharmaplus-production-7fa8.up.railway.app/api/v1/auth/signup';
     const payload = isLogin
       ? { email: formData.email, password: formData.password }
       : formData;

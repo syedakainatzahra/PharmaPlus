@@ -27,7 +27,7 @@ const BranchOverviewContent = () => {
         }
 
         const response = await fetch(
-          'http://localhost:5000/api/v1/branch-managers/stats',
+          'https://pharmaplus-production-7fa8.up.railway.app/api/v1/branch-managers/stats',
           {
             method: 'GET',
             headers: {
