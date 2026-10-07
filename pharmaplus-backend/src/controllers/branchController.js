@@ -78,11 +78,13 @@ const getPublicBranches = async (req, res) => {
       branches
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
+  console.error('❌ getPublicBranches ERROR:', error);
+
+  return res.status(500).json({
+    success: false,
+    message: error.message || 'Failed to fetch branches',
+  });
+}
 };
 
 // 3. Toggle Branch Active Status
