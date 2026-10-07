@@ -80,6 +80,15 @@ const getPublicBranches = async (req, res) => {
   } catch (error) {
   console.error('❌ getPublicBranches ERROR:', error);
 
+  console.error('🔍 DB ERROR DETAILS:', {
+    code: error.code,
+    causeCode: error.cause?.code,
+    causeMessage: error.cause?.message,
+    address: error.cause?.address,
+    port: error.cause?.port,
+    meta: error.meta,
+  });
+
   return res.status(500).json({
     success: false,
     message: error.message || 'Failed to fetch branches',
